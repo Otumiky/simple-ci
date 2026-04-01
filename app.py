@@ -4,7 +4,7 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Hello from Docker Michael CICD Pipeline!")
+        self.wfile.write(b"Hello from Docker Michael CICD Pipeline corrected!")
 
 PORT = 5000
 server = HTTPServer(("", PORT), handler)
