@@ -1,4 +1,4 @@
-name: Docker CI
+name: Docker CI-CD
 
 on:
   push:
@@ -6,12 +6,11 @@ on:
       - main
 
 jobs:
-  build:
 
+  build:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -22,7 +21,26 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/simple-ci-app .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/simple-ci-app:latest .
 
       - name: Push Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/simple-ci-app:latest
+
+
+  deploy:
+    needs: build   # 👈 runs only if build succeeds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/simple-ci-app:latest
+            docker stop simple-ci-app || true
+            docker rm simple-ci-app || true
+            docker run -d -p 5000:5000 --name simple-ci-app ${{ secrets.DOCKER_USERNAME }}/simple-ci-app:latest
