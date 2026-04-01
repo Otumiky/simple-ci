@@ -6,7 +6,6 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"Hello from APP 2!")
 
-
 PORT = 5000
 server = HTTPServer(("", PORT), handler)
 
